@@ -7,7 +7,7 @@ then
     exit 1
 fi
 
-command="gcc main.c -Wall -Werror -o snake -I/usr/local/include/SDL2 -L/opt/homebrew/lib -lSDL2"
+command="gcc snake.c -Wall -Werror -o snake -I/usr/local/include/SDL2 -L/opt/homebrew/lib -lSDL2"
 
 echo "Running build command"
 echo $command
