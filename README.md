@@ -22,3 +22,5 @@ To run the game:
 ```
 
 Control the snake with the arrow keys.
+
+![Snake](assets/snake.gif)
