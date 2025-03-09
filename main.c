@@ -156,6 +156,19 @@ void update(GameState *gameState) {
     break;
   }
 
+  // Check if the snake has collided with the walls or itself
+  if (new_head.x < 0 || new_head.x >= GAME_AREA_WIDTH || new_head.y < 0 ||
+      new_head.y >= GAME_AREA_HEIGHT) {
+    gameState->quit = true;
+    return;
+  }
+  for (int i = 1; i < snake->length; i++) {
+    if (new_head.x == snake->body[i].x && new_head.y == snake->body[i].y) {
+      gameState->quit = true;
+      return;
+    }
+  }
+
   // Check if the snake has collided with the food
   if (new_head.x == food->position.x && new_head.y == food->position.y) {
     snake->length++;
@@ -173,17 +186,6 @@ void update(GameState *gameState) {
       snake->body[i] = snake->body[i - 1];
     }
     snake->body[0] = new_head;
-  }
-
-  // Check if the snake has collided with the walls or itself
-  if (new_head.x < 0 || new_head.x >= GAME_AREA_WIDTH || new_head.y < 0 ||
-      new_head.y >= GAME_AREA_HEIGHT) {
-    gameState->quit = true;
-  }
-  for (int i = 1; i < snake->length; i++) {
-    if (new_head.x == snake->body[i].x && new_head.y == snake->body[i].y) {
-      gameState->quit = true;
-    }
   }
 }
 
