@@ -9,7 +9,7 @@
 #define GAME_AREA_WIDTH (WINDOW_WIDTH - 2 * WINDOW_MARGIN)
 #define GAME_AREA_HEIGHT (WINDOW_HEIGHT - 2 * WINDOW_MARGIN)
 #define SNAKE_SIZE 20
-#define SNAKE_SPEED 100
+#define SNAKE_START_SPEED 60.0
 
 typedef struct {
   int r, g, b, a;
@@ -26,6 +26,7 @@ typedef struct {
   Point *body;
   int length;
   int capacity;
+  float speed;
   Direction direction;
 } Snake;
 
@@ -67,6 +68,7 @@ Snake initSnake() {
     snake.body[i].x = GAME_AREA_WIDTH / 2 - i * SNAKE_SIZE;
     snake.body[i].y = GAME_AREA_HEIGHT / 2;
   }
+  snake.speed = SNAKE_START_SPEED;
   snake.direction = RIGHT;
   return snake;
 }
@@ -171,6 +173,7 @@ void update(GameState *gameState) {
 
   // Check if the snake has collided with the food
   if (new_head.x == food->position.x && new_head.y == food->position.y) {
+    snake->speed -= 0.25;
     snake->length++;
     if (snake->length >= snake->capacity) {
       snake->capacity *= 2;
@@ -235,14 +238,14 @@ int main() {
 
   GameState gameState = initGameState();
 
-  bool running = true;
   Uint32 lastUpdateTime = SDL_GetTicks();
+  bool running = true;
   while (running) {
     handle_events(&gameState);
     running = !gameState.quit;
 
     Uint32 currentTime = SDL_GetTicks();
-    if (currentTime - lastUpdateTime >= SNAKE_SPEED) {
+    if (currentTime - lastUpdateTime >= gameState.snake.speed) {
       update(&gameState);
       lastUpdateTime = currentTime;
     }
