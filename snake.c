@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -8,7 +9,10 @@
 #define WINDOW_MARGIN 20
 #define GAME_AREA_WIDTH (WINDOW_WIDTH - 2 * WINDOW_MARGIN)
 #define GAME_AREA_HEIGHT (WINDOW_HEIGHT - 2 * WINDOW_MARGIN)
+#define SNAKE_INITIAL_CAPACITY 20
+#define SNAKE_INITIAL_LENGTH 3
 #define SNAKE_SIZE 20
+#define SNAKE_SPEED_DECREMENT 0.25
 #define SNAKE_START_SPEED 60.0
 
 typedef struct {
@@ -19,8 +23,7 @@ typedef struct {
   int x, y;
 } Point;
 
-typedef enum { UP, DOWN, LEFT, RIGHT } Direction;
-typedef enum { N, S, E, W, NONE } NewDirection;
+typedef enum { UP, DOWN, LEFT, RIGHT, NONE } Direction;
 
 typedef struct {
   Point *body;
@@ -37,7 +40,7 @@ typedef struct {
 typedef struct {
   Snake snake;
   Food food;
-  NewDirection newDirection;
+  Direction newDirection;
   bool quit;
 } GameState;
 
@@ -61,8 +64,8 @@ void placeFood(Food *food, Snake *snake) {
 
 Snake initSnake() {
   Snake snake;
-  snake.length = 3;
-  snake.capacity = 20;
+  snake.length = SNAKE_INITIAL_LENGTH;
+  snake.capacity = SNAKE_INITIAL_CAPACITY;
   snake.body = malloc(snake.capacity * sizeof(Point));
   for (int i = 0; i < snake.length; i++) {
     snake.body[i].x = GAME_AREA_WIDTH / 2 - i * SNAKE_SIZE;
@@ -82,7 +85,7 @@ Food initFood(Snake *snake) {
 GameState initGameState() {
   Snake snake = initSnake();
   Food food = initFood(&snake);
-  NewDirection newDirection = E;
+  Direction newDirection = NONE;
   bool quit = false;
   return (GameState){snake, food, newDirection, quit};
 }
@@ -96,16 +99,16 @@ void handle_events(GameState *gameState) {
     } else if (event.type == SDL_KEYDOWN) {
       switch (event.key.keysym.sym) {
       case SDLK_UP:
-        gameState->newDirection = N;
+        gameState->newDirection = UP;
         break;
       case SDLK_DOWN:
-        gameState->newDirection = S;
+        gameState->newDirection = DOWN;
         break;
       case SDLK_LEFT:
-        gameState->newDirection = W;
+        gameState->newDirection = LEFT;
         break;
       case SDLK_RIGHT:
-        gameState->newDirection = E;
+        gameState->newDirection = RIGHT;
         break;
       }
     }
@@ -118,22 +121,22 @@ void update(GameState *gameState) {
   Point new_head = {snake->body[0].x, snake->body[0].y};
 
   switch (gameState->newDirection) {
-  case N:
+  case UP:
     if (snake->direction != DOWN) {
       snake->direction = UP;
       break;
     }
-  case S:
+  case DOWN:
     if (snake->direction != UP) {
       snake->direction = DOWN;
       break;
     }
-  case W:
+  case LEFT:
     if (snake->direction != RIGHT) {
       snake->direction = LEFT;
       break;
     }
-  case E:
+  case RIGHT:
     if (snake->direction != LEFT) {
       snake->direction = RIGHT;
       break;
@@ -156,6 +159,8 @@ void update(GameState *gameState) {
   case RIGHT:
     new_head.x += SNAKE_SIZE;
     break;
+  case NONE:
+    break;
   }
 
   // Check if the snake has collided with the walls or itself
@@ -173,7 +178,7 @@ void update(GameState *gameState) {
 
   // Check if the snake has collided with the food
   if (new_head.x == food->position.x && new_head.y == food->position.y) {
-    snake->speed -= 0.25;
+    snake->speed -= SNAKE_SPEED_DECREMENT;
     snake->length++;
     if (snake->length >= snake->capacity) {
       snake->capacity *= 2;
@@ -198,6 +203,7 @@ void render(SDL_Renderer *renderer, GameState gameState) {
   Color green = {0, 255, 0, 255};
   Color red = {255, 0, 0, 255};
 
+  // Clear the screen
   SDL_SetRenderDrawColor(renderer, black.r, black.g, black.b, black.a);
   SDL_RenderClear(renderer);
 
@@ -233,7 +239,6 @@ int main() {
                        WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
   SDL_Renderer *renderer =
       SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
   srand(time(NULL));
 
   GameState gameState = initGameState();
