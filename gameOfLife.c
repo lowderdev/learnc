@@ -4,11 +4,12 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define CELL_SIZE 20
-#define GRID_WIDTH 32
+#define CELL_SIZE 10
+#define GRID_WIDTH 60
+#define GRID_HEIGHT 40
 #define WINDOW_MARGIN (CELL_SIZE)
 #define GAME_AREA_WIDTH (CELL_SIZE * GRID_WIDTH)
-#define GAME_AREA_HEIGHT (CELL_SIZE * GRID_WIDTH)
+#define GAME_AREA_HEIGHT (CELL_SIZE * GRID_HEIGHT)
 #define WINDOW_WIDTH (GAME_AREA_WIDTH + 2 * WINDOW_MARGIN)
 #define WINDOW_HEIGHT (GAME_AREA_HEIGHT + 2 * WINDOW_MARGIN)
 
@@ -16,10 +17,10 @@ typedef struct {
   int r, g, b, a;
 } Color;
 
-void initGrid(bool grid[GRID_WIDTH][GRID_WIDTH]) {
-  for (int y = 0; y < GRID_WIDTH; y++) {
+void initGrid(bool grid[GRID_HEIGHT][GRID_WIDTH]) {
+  for (int y = 0; y < GRID_HEIGHT; y++) {
     for (int x = 0; x < GRID_WIDTH; x++) {
-      grid[y][x] = rand() % 10 < 3; // 30% chance
+      grid[y][x] = rand() % 100 < 8;
     }
   }
   // print the state of the grid
@@ -31,31 +32,45 @@ void initGrid(bool grid[GRID_WIDTH][GRID_WIDTH]) {
   // }
 }
 
-// int countAliveNeighbors(Grid *grid, int x, int y) {
+int countAliveNeighbors(bool grid[GRID_HEIGHT][GRID_WIDTH], int x, int y) {
+  int count = 0;
+  if (x > 0 && grid[y][x - 1])
+    count++;
+  if (x < GRID_WIDTH - 1 && grid[y][x + 1])
+    count++;
+  if (y > 0 && grid[y - 1][x])
+    count++;
+  if (y < GRID_HEIGHT - 1 && grid[y + 1][x])
+    count++;
+  if (x > 0 && y > 0 && grid[y - 1][x - 1])
+    count++;
+  if (x < GRID_WIDTH - 1 && y > 0 && grid[y - 1][x + 1])
+    count++;
+  if (x > 0 && y < GRID_HEIGHT - 1 && grid[y + 1][x - 1])
+    count++;
+  if (x < GRID_WIDTH - 1 && y < GRID_HEIGHT - 1 && grid[y + 1][x + 1])
+    count++;
+  return count;
+}
 
-// }
+void update(bool grid[GRID_HEIGHT][GRID_WIDTH]) {
+  for (int y = 0; y < GRID_HEIGHT; y++) {
+    for (int x = 0; x < GRID_WIDTH; x++) {
+      int aliveNeighbors = countAliveNeighbors(grid, x, y);
+      if (grid[y][x]) {
+        if (aliveNeighbors < 2 || aliveNeighbors > 3) {
+          grid[y][x] = false;
+        }
+      } else {
+        if (aliveNeighbors == 3) {
+          grid[y][x] = true;
+        }
+      }
+    }
+  }
+}
 
-// void update(Grid *grid) {
-//   for (int y = 0; y < GRID_WIDTH; y++) {
-//     for (int x = 0; x < GRID_WIDTH; x++) {
-//       int i = y * GRID_WIDTH + x;
-//       Cell cell = grid->cells[i];
-//       int aliveNeighbors = countAliveNeighbors(grid, cell.x, cell.y);
-//       if (cell.alive) {
-//         if (aliveNeighbors < 2 || aliveNeighbors > 3) {
-//           cell.alive = false;
-//         }
-//       } else {
-//         if (aliveNeighbors == 3) {
-//           cell.alive = true;
-//         }
-//       }
-//       grid->cells[i] = cell;
-//     }
-//   }
-// }
-
-void render(SDL_Renderer *renderer, bool grid[GRID_WIDTH][GRID_WIDTH]) {
+void render(SDL_Renderer *renderer, bool grid[GRID_HEIGHT][GRID_WIDTH]) {
   Color black = {0, 0, 0, 255};
   Color white = {255, 255, 255, 255};
   Color darkGrey = {64, 64, 64, 255};
@@ -69,11 +84,12 @@ void render(SDL_Renderer *renderer, bool grid[GRID_WIDTH][GRID_WIDTH]) {
 
   // Draw the game area
   SDL_SetRenderDrawColor(renderer, white.r, white.g, white.b, white.a);
-  SDL_Rect game_area_rect = {19, 19, GAME_AREA_WIDTH + 2, GAME_AREA_HEIGHT + 2};
+  SDL_Rect game_area_rect = {WINDOW_MARGIN - 1, WINDOW_MARGIN - 1,
+                             GAME_AREA_WIDTH + 2, GAME_AREA_HEIGHT + 2};
   SDL_RenderDrawRect(renderer, &game_area_rect);
 
   // render grid
-  for (int y = 0; y < GRID_WIDTH; y++) {
+  for (int y = 0; y < GRID_HEIGHT; y++) {
     for (int x = 0; x < GRID_WIDTH; x++) {
       bool alive = grid[y][x];
       SDL_Rect rect = {x * CELL_SIZE + WINDOW_MARGIN,
@@ -99,7 +115,7 @@ int main() {
       SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
   srand(time(NULL));
 
-  bool grid[GRID_WIDTH][GRID_WIDTH];
+  bool grid[GRID_HEIGHT][GRID_WIDTH];
   initGrid(grid);
 
   bool running = true;
@@ -111,7 +127,7 @@ int main() {
       }
     }
 
-    // update(&grid);
+    update(grid);
     render(renderer, grid);
 
     // Cap the frame rate to 60 FPS
