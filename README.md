@@ -6,9 +6,9 @@ To build you'll need `gcc` and `sdl2` installed.
 
 ```bash
 brew install sdl2
-bin/build-snake.sh
+bin/build-snake
 # run the game
-./snake
+out/snake
 ```
 
 Control the snake with the arrow keys.
@@ -20,7 +20,7 @@ Control the snake with the arrow keys.
 Build and run:
 
 ```bash
-bin/build-gameOfLife.sh && ./gameOfLife
+bin/build-gameOfLife && out/gameOfLife
 ```
 
 Controls:

@@ -7,7 +7,7 @@ then
     exit 1
 fi
 
-command="gcc gameOfLife.c -Wall -Werror -o gameOfLife -I/usr/local/include/SDL2 -L/opt/homebrew/lib -lSDL2"
+command="gcc lib/gameOfLife.c -Wall -Werror -o out/gameOfLife -I/usr/local/include/SDL2 -L/opt/homebrew/lib -lSDL2"
 
 echo "Running build command"
 echo $command
