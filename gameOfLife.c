@@ -5,8 +5,8 @@
 #include <time.h>
 
 #define CELL_SIZE 10
-#define GRID_WIDTH 60
-#define GRID_HEIGHT 40
+#define GRID_WIDTH 120
+#define GRID_HEIGHT 80
 #define WINDOW_MARGIN (CELL_SIZE)
 #define GAME_AREA_WIDTH (CELL_SIZE * GRID_WIDTH)
 #define GAME_AREA_HEIGHT (CELL_SIZE * GRID_HEIGHT)
@@ -119,19 +119,44 @@ int main() {
   initGrid(grid);
 
   bool running = true;
+  bool paused = false;
+  int speed = 100;
   while (running) {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_QUIT) {
         running = false;
+      } else if (event.type == SDL_KEYDOWN) {
+        switch (event.key.keysym.sym) {
+        case SDLK_UP:
+          if (paused) {
+            paused = false;
+          }
+          speed = (speed > 20) ? speed - 20 : 10;
+          break;
+        case SDLK_DOWN:
+          if (speed < 1000) {
+            speed += 20;
+          } else {
+            paused = true;
+          }
+          break;
+        case SDLK_p:
+          paused = !paused;
+          break;
+        case SDLK_r:
+          initGrid(grid);
+          break;
+        }
       }
     }
 
-    update(grid);
+    if (!paused) {
+      update(grid);
+    }
     render(renderer, grid);
 
-    // Cap the frame rate to 60 FPS
-    SDL_Delay(1000 / 60);
+    SDL_Delay(speed);
   }
 
   // Cleanup
