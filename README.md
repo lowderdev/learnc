@@ -1,22 +1,12 @@
 # Toy Projects for Learning C
 
-So far I have just built a basic verison of snake.
-
 ## Snake
 
 To build you'll need `gcc` and `sdl2` installed.
 
 ```bash
-# install sdl2
 brew install sdl2
-# builds an executable call `snake`
 bin/build-snake.sh
-# Running build command
-# gcc snake.c -Wall -Werror -o snake -I/usr/local/include/SDL2 -L/opt/homebrew/lib -lSDL2
-```
-
-To run the game:
-```bash
 # run the game
 ./snake
 ```
@@ -24,3 +14,20 @@ To run the game:
 Control the snake with the arrow keys.
 
 ![Snake](assets/snake.gif)
+
+## Game of Life
+
+Build and run:
+
+```bash
+bin/build-gameOfLife.sh && ./gameOfLife
+```
+
+Controls:
+
+- Up arrow: Increase speed
+- Down arrow: Decrease speed
+- P: Pause
+- R: Reset
+
+![Game of Life](assets/gameOfLife.gif)
