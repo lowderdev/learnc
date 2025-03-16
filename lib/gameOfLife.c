@@ -120,6 +120,7 @@ int main() {
 
   bool running = true;
   bool paused = false;
+  bool step = false;
   int speed = 100;
   while (running) {
     SDL_Event event;
@@ -141,6 +142,12 @@ int main() {
             paused = true;
           }
           break;
+        case SDLK_RIGHT:
+          step = true;
+          break;
+        case SDLK_SPACE:
+          paused = !paused;
+          break;
         case SDLK_p:
           paused = !paused;
           break;
@@ -151,8 +158,9 @@ int main() {
       }
     }
 
-    if (!paused) {
+    if (!paused || step) {
       update(grid);
+      step = false;
     }
     render(renderer, grid);
 
